@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", default="localhost 127.0.0.1 [::1]").split(" ")
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'user'
 ]
 
 MIDDLEWARE = [
@@ -132,8 +133,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_EXPIRES_IN"))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_EXPIRES_IN"))),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_EXPIRES_IN", default=5))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_EXPIRES_IN", default=1))),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
@@ -155,8 +156,8 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_EXPIRES_IN"))),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_EXPIRES_IN"))),
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_EXPIRES_IN", default=5))),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_EXPIRES_IN", default=1))),
 }
 
 # Static files (CSS, JavaScript, Images)
