@@ -4,3 +4,4 @@
 /.env.dev
 /.idea
 /.idea/.gitignore
+/postman_for_poor.py
