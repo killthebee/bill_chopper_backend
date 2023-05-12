@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
+from user.models import Profile
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -27,3 +28,22 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('first_name', 'username', )
+
+
+class UpdateUserImageSerializer(serializers.ModelSerializer):
+    """
+    Changes the user's profile image.
+
+    Fields: profile_image.
+    """
+    profile_image = serializers.ImageField(required=True)
+
+    class Meta:
+        model = Profile
+        fields = ('profile_image', )
+
+    def save(self, *args, **kwargs):
+        if self.instance.profile_image:
+            self.instance.profile_image.delete()
+
+        return super().save(*args, **kwargs)
