@@ -47,3 +47,17 @@ class UpdateUserImageSerializer(serializers.ModelSerializer):
             self.instance.profile_image.delete()
 
         return super().save(*args, **kwargs)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('is_male', )
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'profile', )

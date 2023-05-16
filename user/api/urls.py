@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DummyView, RegisterView, UserDetailsAPIView, UserImageUploadAPIView
+from .views import DummyView, RegisterView, UserDetailsAPIView, UserImageUploadAPIView, UpdateUserAPIView
 
 
 app_name = "user_api"
@@ -10,4 +10,5 @@ urlpatterns = [
     path("register/", RegisterView.as_view(), name='register'),
     path("user/", UserDetailsAPIView.as_view(), name='user'),
     path("update_image/", UserImageUploadAPIView.as_view(), name="image"),
+    path("update_user/", UpdateUserAPIView.as_view(), name="user_update"),
 ]

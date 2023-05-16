@@ -19,6 +19,7 @@ def upload_to(instance, filename):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_image = models.ImageField(upload_to=upload_to)
+    is_male = models.BooleanField(default=True)
 
 
 @receiver(post_save, sender=User)
