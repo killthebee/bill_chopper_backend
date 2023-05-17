@@ -22,6 +22,35 @@ class Profile(models.Model):
     is_male = models.BooleanField(default=True)
 
 
+class Event(models.Model):
+    TRIP, PURCHASE, PARTY, OTHER = 1, 2, 3, 4
+    TYPES = (
+        (TRIP, "Trip"),
+        (PURCHASE, "Purchase"),
+        (PARTY, "Party"),
+        (OTHER, "Other"),
+    )
+    event_type = models.PositiveIntegerField(
+        default=OTHER,
+        choices=TYPES,
+        db_index=True
+    )
+    name = models.CharField(max_length=50)
+    participants = models.ManyToManyField(User, through="EventParticipants", )
+
+
+class EventParticipants(models.Model):
+    user = models.ForeignKey(User, related_name="users", on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, related_name="events", on_delete=models.CASCADE)
+
+
+class Spend(models.Model):
+    name = models.CharField(max_length=50)
+    event = models.ForeignKey(Event, related_name="spends", on_delete=models.CASCADE)
+    payeer = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

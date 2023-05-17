@@ -102,3 +102,28 @@ class UpdateUserAPIView(generics.UpdateAPIView):
         instance.save()
         profile.save()
         return Response(data={"success": True}, status=status.HTTP_200_OK)
+
+
+class FetchUserInfo(generics.RetrieveAPIView):
+    """
+    Retrive user info if the user exists
+    """
+    permission_classes = (IsAuthenticated, )
+    # allowed_methods = ("GET", "POST", )
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        print(self.request.data)
+        username = self.request.data["username"]
+        filter_kwargs = {self.lookup_field: username}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+        print(obj)
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    def post(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)

@@ -4,6 +4,12 @@ from django.contrib.auth.password_validation import validate_password
 from user.models import Profile
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('is_male', 'profile_image', )
+
+
 class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
@@ -24,10 +30,10 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    profile = ProfileSerializer()
     class Meta:
         model = User
-        fields = ('first_name', 'username', )
+        fields = ('first_name', 'username', 'profile')
 
 
 class UpdateUserImageSerializer(serializers.ModelSerializer):
@@ -47,12 +53,6 @@ class UpdateUserImageSerializer(serializers.ModelSerializer):
             self.instance.profile_image.delete()
 
         return super().save(*args, **kwargs)
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ('is_male', )
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
