@@ -1,11 +1,13 @@
 from rest_framework import generics, status
 from django.contrib.auth.models import User
+from user.models import Event
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import FormParser, MultiPartParser
-from .serializers import RegisterUserSerializer, UserSerializer, UpdateUserImageSerializer, UpdateUserSerializer
+from .serializers import (RegisterUserSerializer, UserSerializer, UpdateUserImageSerializer,
+                          UpdateUserSerializer, CreateEventSerializer, ParticipantsSerializer)
 
 
 class DummyView(APIView):
@@ -127,3 +129,27 @@ class FetchUserInfo(generics.RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
+
+
+class CreateEvent(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated, )
+    queryset = Event.objects.all()
+    serializer_class = CreateEventSerializer
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        users = request.data['participants']
+        for user in users:
+            users_serializer = ParticipantsSerializer(data=user)
+            if users_serializer.is_valid():
+                users_serializer.save()
+            else:
+                return
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

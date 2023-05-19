@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from user.models import Profile
+from user.models import Profile, EventParticipants, Event
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -61,3 +61,33 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'first_name', 'profile', )
+
+
+class ParticipantsSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255, write_only=True, required=True)
+    def create(self, validated_data):
+        user = User.objects.get_or_create(username=validated_data['username'])
+        return user
+
+    class Meta:
+        model = User
+        fields = ('username', )
+
+
+class CreateEventSerializer(serializers.ModelSerializer):
+    participants = ParticipantsSerializer(many=True)
+
+    def create(self, validated_data):
+        print(validated_data)
+        users = validated_data.pop('participants')
+        print(users)
+        event = Event.objects.create(**validated_data)
+        for user in users:
+            print(type(user["username"]))
+            event_participant, is_created = User.objects.get_or_create(username=user['username'])
+            EventParticipants.objects.create(user=event_participant, event=event)
+        return event
+
+    class Meta:
+        model = Event
+        fields = ('name', 'event_type', 'participants', )

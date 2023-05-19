@@ -25,10 +25,10 @@ class Profile(models.Model):
 class Event(models.Model):
     TRIP, PURCHASE, PARTY, OTHER = 1, 2, 3, 4
     TYPES = (
-        (TRIP, "Trip"),
-        (PURCHASE, "Purchase"),
-        (PARTY, "Party"),
-        (OTHER, "Other"),
+        (TRIP, "trip"),
+        (PURCHASE, "purchase"),
+        (PARTY, "party"),
+        (OTHER, "other"),
     )
     event_type = models.PositiveIntegerField(
         default=OTHER,
@@ -48,7 +48,6 @@ class Spend(models.Model):
     name = models.CharField(max_length=50)
     event = models.ForeignKey(Event, related_name="spends", on_delete=models.CASCADE)
     payeer = models.ForeignKey(User, on_delete=models.CASCADE)
-
 
 
 @receiver(post_save, sender=User)
