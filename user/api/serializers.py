@@ -75,15 +75,18 @@ class ParticipantsSerializer(serializers.Serializer):
 
 
 class CreateEventSerializer(serializers.ModelSerializer):
-    participants = ParticipantsSerializer(many=True)
+    participants = ParticipantsSerializer(many=True, required=True)
+
+    def validate_participants(self, value):
+        if len(value) == 0:
+            raise serializers.ValidationError({"participants": "No participants provided"})
+
+        return value
 
     def create(self, validated_data):
-        print(validated_data)
         users = validated_data.pop('participants')
-        print(users)
         event = Event.objects.create(**validated_data)
         for user in users:
-            print(type(user["username"]))
             event_participant, is_created = User.objects.get_or_create(username=user['username'])
             EventParticipants.objects.create(user=event_participant, event=event)
         return event
