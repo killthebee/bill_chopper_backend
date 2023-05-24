@@ -48,6 +48,7 @@ class Spend(models.Model):
     name = models.CharField(max_length=50)
     event = models.ForeignKey(Event, related_name="spends", on_delete=models.CASCADE)
     payeer = models.ForeignKey(User, on_delete=models.CASCADE)
+    split = models.JSONField(null=True)
 
 
 @receiver(post_save, sender=User)

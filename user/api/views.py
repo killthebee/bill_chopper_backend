@@ -1,13 +1,14 @@
 from rest_framework import generics, status
 from django.contrib.auth.models import User
-from user.models import Event
+from user.models import Event, Spend
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import FormParser, MultiPartParser
-from .serializers import (RegisterUserSerializer, UserSerializer, UpdateUserImageSerializer,
-                          UpdateUserSerializer, CreateEventSerializer, ParticipantsSerializer)
+from .serializers import (RegisterUserSerializer, RetriveUserSerializer, UpdateUserImageSerializer,
+                          UpdateUserSerializer, CreateEventSerializer, ParticipantsSerializer,
+                          EventSerializer)
 
 
 class DummyView(APIView):
@@ -36,7 +37,7 @@ class UserDetailsAPIView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated, )
     queryset = User.objects.all()
     lookup_field = 'username'
-    serializer_class = UserSerializer
+    serializer_class = RetriveUserSerializer
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
@@ -114,7 +115,7 @@ class FetchUserInfo(generics.RetrieveAPIView):
     # allowed_methods = ("GET", "POST", )
     queryset = User.objects.all()
     lookup_field = 'username'
-    serializer_class = UserSerializer
+    serializer_class = RetriveUserSerializer
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
@@ -150,3 +151,31 @@ class CreateEvent(generics.CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CreateSpend(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated, )
+    queryset = Spend.objects.all()
+
+
+class FetchEvents(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    queryset = Event.objects.all()
+    lookup_field = 'participants'
+    serializer_class = EventSerializer
+
+    def filter_queryset(self, queryset):
+        queryset = queryset.filter(participants=self.request.user)
+        return queryset
+
+    # def get_object(self):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #     print(self.request.data)
+    #     username = self.request.user
+    #     filter_kwargs = {self.lookup_field: username}
+    #     obj = get_object_or_404(queryset, **filter_kwargs)
+    #     print(obj)
+    #     self.check_object_permissions(self.request, obj)
+    #
+    #     return obj
+

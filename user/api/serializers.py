@@ -10,12 +10,19 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('is_male', 'profile_image', )
 
 
-class RegisterUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', )
+
+
+class RegisterUserSerializer(UserSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'first_name', )
+        fields = UserSerializer.Meta.fields + ('password', 'first_name', )
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -29,11 +36,19 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserSerializer(serializers.ModelSerializer):
+class EventSerializer(serializers.ModelSerializer):
+    participants = UserSerializer(many=True)
+
+    class Meta:
+        model = Event
+        fields = ('id', 'event_type', 'name', 'participants', )
+
+
+class RetriveUserSerializer(UserSerializer):
     profile = ProfileSerializer()
     class Meta:
         model = User
-        fields = ('first_name', 'username', 'profile')
+        fields = UserSerializer.Meta.fields + ('first_name', 'profile', )
 
 
 class UpdateUserImageSerializer(serializers.ModelSerializer):
