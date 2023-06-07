@@ -1,4 +1,5 @@
 import os
+import datetime
 from django.db import models
 from django.utils import timezone
 from django.db.models.signals import post_save
@@ -49,6 +50,8 @@ class Spend(models.Model):
     event = models.ForeignKey(Event, related_name="spends", on_delete=models.CASCADE)
     payeer = models.ForeignKey(User, on_delete=models.CASCADE)
     split = models.JSONField(null=True)
+    date = models.DateField(default=datetime.date.today)
+    amount = models.IntegerField(default=0)
 
 
 @receiver(post_save, sender=User)

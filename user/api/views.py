@@ -1,3 +1,4 @@
+import json
 from rest_framework import generics, status
 from django.contrib.auth.models import User
 from user.models import Event, Spend
@@ -8,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import FormParser, MultiPartParser
 from .serializers import (RegisterUserSerializer, RetriveUserSerializer, UpdateUserImageSerializer,
                           UpdateUserSerializer, CreateEventSerializer, ParticipantsSerializer,
-                          EventSerializer)
+                          EventSerializer, CreateSpendSerializer, RetrieveEventsSpendsSerializer)
 
 
 class DummyView(APIView):
@@ -154,8 +155,25 @@ class CreateEvent(generics.CreateAPIView):
 
 
 class CreateSpend(generics.CreateAPIView):
+
     permission_classes = (IsAuthenticated, )
     queryset = Spend.objects.all()
+    serializer_class = CreateSpendSerializer
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        payeer = User.objects.get(username=request.data['payeer']['username'])
+        event = Event.objects.get(pk=request.data['event']['id'])
+        spend = Spend.objects.create(
+            payeer=payeer,
+            event=event,
+            name=request.data['name'],
+            split=request.data['split'],
+            date=request.data['date'],
+            amount=request.data['amount'],
+        )
+        spend.save()
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
 
 
 class FetchEvents(generics.ListAPIView):
@@ -168,14 +186,29 @@ class FetchEvents(generics.ListAPIView):
         queryset = queryset.filter(participants=self.request.user)
         return queryset
 
-    # def get_object(self):
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #     print(self.request.data)
-    #     username = self.request.user
-    #     filter_kwargs = {self.lookup_field: username}
-    #     obj = get_object_or_404(queryset, **filter_kwargs)
-    #     print(obj)
-    #     self.check_object_permissions(self.request, obj)
-    #
-    #     return obj
 
+class FetchEventsSpends(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Event.objects.all()
+    serializer_class = RetrieveEventsSpendsSerializer
+
+    def filter_queryset(self, queryset):
+        queryset = queryset.filter(participants=self.request.user)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        for event in serializer.data:
+            spends = event['spends']
+            for spend in spends:
+                print(type(spend['split']))
+                hm = json.loads(spend['split'])
+                spend['split'] = hm
+        return Response(serializer.data)

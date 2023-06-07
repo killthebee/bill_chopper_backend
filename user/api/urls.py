@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (DummyView, RegisterView, UserDetailsAPIView, UserImageUploadAPIView, UpdateUserAPIView,
-FetchUserInfo, CreateEvent, FetchEvents)
+FetchUserInfo, CreateEvent, FetchEvents, CreateSpend, FetchEventsSpends)
 
 
 app_name = "user_api"
@@ -15,4 +15,6 @@ urlpatterns = [
     path("fetch_user_info/", FetchUserInfo.as_view(), name="user_info"),
     path("create_event/", CreateEvent.as_view(), name="create_event"),
     path("fetch_event/", FetchEvents.as_view(), name="fetch_event"),
+    path("create_spend/", CreateSpend.as_view(), name="create_spend"),
+    path("fetch_events_spends/", FetchEventsSpends.as_view(), name="events_spends"),
 ]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from user.models import Profile, EventParticipants, Event
+from user.models import Profile, EventParticipants, Event, Spend
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -14,6 +14,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+        fields = ('username', )
+
+
+class SimpleUserSerializer(serializers.Serializer):
+
+    class Meta:
         fields = ('username', )
 
 
@@ -37,7 +43,7 @@ class RegisterUserSerializer(UserSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    participants = UserSerializer(many=True)
+    participants = UserSerializer(many=True, required=False)
 
     class Meta:
         model = Event
@@ -109,3 +115,29 @@ class CreateEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('name', 'event_type', 'participants', )
+
+
+class CreateSpendSerializer(serializers.ModelSerializer):
+    event = EventSerializer(read_only=True)
+    payeer = SimpleUserSerializer(read_only=True)
+
+    class Meta:
+        model = Spend
+        fields = ('name', 'event', 'payeer', 'split', 'date')
+
+
+class RetrieveSpendSerializer(serializers.ModelSerializer):
+    payeer = RetriveUserSerializer()
+
+    class Meta:
+        model = Spend
+        fields = ('name', 'event', 'payeer', 'split', 'date', 'amount')
+
+
+class RetrieveEventsSpendsSerializer(serializers.ModelSerializer):
+    participants = RetriveUserSerializer(many=True)
+    spends = RetrieveSpendSerializer(many=True)
+
+    class Meta:
+        model = Event
+        fields = ('id', 'name', 'event_type', 'participants', 'spends', )
