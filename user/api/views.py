@@ -173,7 +173,7 @@ class CreateSpend(generics.CreateAPIView):
             amount=request.data['amount'],
         )
         spend.save()
-        return Response({"success": True}, status=status.HTTP_201_CREATED)
+        return Response({"success": True, "spendId": spend.id}, status=status.HTTP_201_CREATED)
 
 
 class FetchEvents(generics.ListAPIView):
@@ -194,6 +194,7 @@ class FetchEventsSpends(generics.ListAPIView):
 
     def filter_queryset(self, queryset):
         queryset = queryset.filter(participants=self.request.user)
+        print(self.request.authenticators)
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -208,7 +209,25 @@ class FetchEventsSpends(generics.ListAPIView):
         for event in serializer.data:
             spends = event['spends']
             for spend in spends:
-                print(type(spend['split']))
                 hm = json.loads(spend['split'])
                 spend['split'] = hm
         return Response(serializer.data)
+
+
+class DeleteSpendSerializer(generics.DestroyAPIView):
+    model = Spend
+    permission_classes = (IsAuthenticated, )
+    queryset = Spend.objects.all()
+    serializer_class = CreateSpendSerializer
+    # lookup_field = "pk"
+
+    def get_authenticators(self):
+        """
+        Instantiates and returns the list of authenticators that this view can use.
+        """
+
+        return [auth() for auth in self.authentication_classes]
+
+    # def _allowed_methods(self):
+    #     print(self.request.authenticators)
+    #     return [m.upper() for m in self.http_method_names if hasattr(self, m)]
