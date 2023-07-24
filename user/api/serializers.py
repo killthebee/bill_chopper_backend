@@ -131,7 +131,7 @@ class RetrieveSpendSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Spend
-        fields = ('name', 'event', 'payeer', 'split', 'date', 'amount')
+        fields = ('name', 'event', 'payeer', 'split', 'date', 'amount', 'id')
 
 
 class RetrieveEventsSpendsSerializer(serializers.ModelSerializer):
