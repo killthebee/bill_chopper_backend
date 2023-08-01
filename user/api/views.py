@@ -142,6 +142,7 @@ class CreateEvent(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         users = request.data['participants']
+        print(users)
         for user in users:
             users_serializer = ParticipantsSerializer(data=user)
             if users_serializer.is_valid():
